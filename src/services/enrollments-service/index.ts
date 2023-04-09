@@ -54,15 +54,19 @@ function getFirstAddress(firstAddress: Address): GetAddressResult {
 
 type GetAddressResult = Omit<Address, 'createdAt' | 'updatedAt' | 'enrollmentId'>;
 
+
+
+
+
+
 async function createOrUpdateEnrollmentWithAddress(params: CreateOrUpdateEnrollmentWithAddress) {
   const enrollment = exclude(params, 'address');
   const address = getAddressForUpsert(params.address);
-
   try {
-   // await getAddressFromCEPService();
-  //  console.log(`enrollment: ${enrollment}`)
-  //  console.log(`address: ${address}`)
+   const result = await getAddressFromCEPService(address.cep);
+   console.log(result)
   } catch {
+    
     throw invalidDataError(['invalid CEP']);
   }
 
@@ -70,6 +74,12 @@ async function createOrUpdateEnrollmentWithAddress(params: CreateOrUpdateEnrollm
 
   await addressRepository.upsert(newEnrollment.id, address, address);
 }
+
+
+
+
+
+
 
 function getAddressForUpsert(address: CreateAddressParams) {
   return {

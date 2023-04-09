@@ -16,17 +16,20 @@ export async function getEnrollmentByUser(req: AuthenticatedRequest, res: Respon
   }
 }
 
-export async function postCreateOrUpdateEnrollment(req: AuthenticatedRequest, res: Response) {
-  
+export async function postCreateOrUpdateEnrollment(req: AuthenticatedRequest, res: Response, next:NextFunction) {
+
+   
   try {
     await enrollmentsService.createOrUpdateEnrollmentWithAddress({
       ...req.body,
       userId: req.userId,
     });
 
-    return res.sendStatus(httpStatus.OK);
+    return res.sendStatus(httpStatus.CREATED);
   } catch (error) {
-    return res.sendStatus(httpStatus.BAD_REQUEST);
+    // return res.sendStatus(httpStatus.BAD_REQUEST);
+    console.log(req.body)
+    next(error)
   }
 }
 
@@ -38,9 +41,6 @@ export async function getAddressFromCEP(req: AuthenticatedRequest, res: Response
     const address: ViaCEPAddress = await enrollmentsService.getAddressFromCEPService(String(cep));
     res.status(httpStatus.OK).send(address);
   } catch (error) {
-    // if (error.name === 'NotFoundError') {
-    //   return res.send(httpStatus.NO_CONTENT);
-    // }
     next(error)
   }
 }

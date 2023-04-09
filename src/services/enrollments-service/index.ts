@@ -59,20 +59,28 @@ type GetAddressResult = Omit<Address, 'createdAt' | 'updatedAt' | 'enrollmentId'
 
 
 
-async function createOrUpdateEnrollmentWithAddress(params: CreateOrUpdateEnrollmentWithAddress) {
+async function createOrUpdateEnrollmentWithAddress(params: CreateOrUpdateEnrollmentWithAddressAndUser) {
+
   const enrollment = exclude(params, 'address');
   const address = getAddressForUpsert(params.address);
+
+  const cep = address.cep
+  const treatedCEP = cep.replace('-', '')
+
   try {
-   const result = await getAddressFromCEPService(address.cep);
-   console.log(result)
-  } catch {
     
+   const result = await getAddressFromCEPService(treatedCEP);
+   if(!result){
+    invalidDataError(['Invalid Body'])
+   }
+
+  } catch {
     throw invalidDataError(['invalid CEP']);
   }
 
   const newEnrollment = await enrollmentRepository.upsert(params.userId, enrollment, exclude(enrollment, 'userId'));
-
   await addressRepository.upsert(newEnrollment.id, address, address);
+  
 }
 
 
@@ -91,6 +99,16 @@ function getAddressForUpsert(address: CreateAddressParams) {
 export type CreateOrUpdateEnrollmentWithAddress = CreateEnrollmentParams & {
   address: CreateAddressParams;
 };
+
+export type CreateOrUpdateEnrollmentWithAddressAndUser ={
+  name: string;
+  cpf: string;
+  birthday: Date;
+  phone: string;
+  userId: number;
+  address: CreateAddressParams;
+}
+
 
 const enrollmentsService = {
   getOneWithAddressByUserId,

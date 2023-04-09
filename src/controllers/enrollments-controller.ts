@@ -3,6 +3,7 @@ import httpStatus from 'http-status';
 import { AuthenticatedRequest } from '@/middlewares';
 import enrollmentsService from '@/services/enrollments-service';
 import { ViaCEPAddress } from '@/protocols';
+import { CreateEnrollmentParams } from '@/repositories/enrollment-repository';
 
 export async function getEnrollmentByUser(req: AuthenticatedRequest, res: Response) {
   const { userId } = req;
@@ -17,20 +18,25 @@ export async function getEnrollmentByUser(req: AuthenticatedRequest, res: Respon
 }
 
 export async function postCreateOrUpdateEnrollment(req: AuthenticatedRequest, res: Response, next:NextFunction) {
+const {name, cpf, birthday, phone, address} =  req.body
 
-   
+
   try {
     await enrollmentsService.createOrUpdateEnrollmentWithAddress({
-      ...req.body,
+      name,
+      cpf,
+      birthday,
+      phone,
       userId: req.userId,
+      address
     });
 
-    return res.sendStatus(httpStatus.CREATED);
+
+    return res.sendStatus(httpStatus.OK);
   } catch (error) {
-    // return res.sendStatus(httpStatus.BAD_REQUEST);
-    console.log(req.body)
+    //return res.sendStatus(httpStatus.BAD_REQUEST);
     next(error)
-  }
+}
 }
 
 export async function getAddressFromCEP(req: AuthenticatedRequest, res: Response, next: NextFunction) {

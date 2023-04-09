@@ -2,6 +2,7 @@ import { Response, NextFunction } from 'express';
 import httpStatus from 'http-status';
 import { AuthenticatedRequest } from '@/middlewares';
 import enrollmentsService from '@/services/enrollments-service';
+import { ViaCEPAddress } from '@/protocols';
 
 export async function getEnrollmentByUser(req: AuthenticatedRequest, res: Response) {
   const { userId } = req;
@@ -32,11 +33,14 @@ export async function postCreateOrUpdateEnrollment(req: AuthenticatedRequest, re
 export async function getAddressFromCEP(req: AuthenticatedRequest, res: Response, next: NextFunction) {
 
   const {cep} = req.query
-  const cepSent = Number(cep)
+
   try {
-    const address = await enrollmentsService.getAddressFromCEPService(cepSent);
+    const address: ViaCEPAddress = await enrollmentsService.getAddressFromCEPService(String(cep));
     res.status(httpStatus.OK).send(address);
   } catch (error) {
+    // if (error.name === 'NotFoundError') {
+    //   return res.send(httpStatus.NO_CONTENT);
+    // }
     next(error)
   }
 }

@@ -31,7 +31,6 @@ const {name, cpf, birthday, phone, address} =  req.body
       address
     });
 
-
     return res.sendStatus(httpStatus.OK);
   } catch (error) {
     //return res.sendStatus(httpStatus.BAD_REQUEST);

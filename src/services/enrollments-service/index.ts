@@ -19,6 +19,16 @@ async function getAddressFromCEPService(cep: string) {
     throw notFoundError();
   }
 
+  if (result.status === 400) {
+    throw invalidDataError([]);
+  }
+ 
+  if(result.data.erro===true){
+    throw invalidDataError([]);
+  }
+  
+  
+
   const addressObject: ViaCEPAddress = {
       logradouro: result.data.logradouro,
       complemento: result.data.complemento,
@@ -79,6 +89,8 @@ async function createOrUpdateEnrollmentWithAddress(params: CreateOrUpdateEnrollm
   }
 
   const newEnrollment = await enrollmentRepository.upsert(params.userId, enrollment, exclude(enrollment, 'userId'));
+
+  
   await addressRepository.upsert(newEnrollment.id, address, address);
   
 }
